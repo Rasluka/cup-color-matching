@@ -1,95 +1,99 @@
-import { useEffect, useState } from "react";
-import CupRed from "./assets/cup-red.png";
-import CupBlue from "./assets/cup-blue.png";
-import CupGreen from "./assets/cup-green.png";
-import CupYellow from "./assets/cup-yellow.png";
-import { Reorder } from "framer-motion";
+// import CupGame from "./CupGame";
+import {
+  Dialog,
+  DialogBackdrop,
+  DialogPanel,
+  DialogTitle,
+  Field,
+  Label,
+  Radio,
+  RadioGroup,
+} from "@headlessui/react";
+import { useState } from "react";
+import { cupData } from "./CupData";
 
-interface ICupState {
-  color: string;
-  image: string;
-}
-
-const cupData: ICupState[] = [
-  { color: "Red", image: CupRed },
-  { color: "Blue", image: CupBlue },
-  { color: "Green", image: CupGreen },
-  { color: "Yellow", image: CupYellow },
-];
+const cupNumbers = [3, 4, 5, 6];
 
 export default function App() {
-  const [shuffledCupData, setShuffledCupData] = useState<ICupState[]>([]);
-  const [cupsOrder, setCupsOrder] = useState<ICupState[]>(cupData);
-  const [matchingCups, setMatchingCups] = useState<number>(0);
-
-  const shuffleArray = (array: ICupState[]) => {
-    //Fisher–Yates shuffle algorithm
-    const shuffledArray = array.slice();
-    for (let i = shuffledArray.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffledArray[i], shuffledArray[j]] = [
-        shuffledArray[j],
-        shuffledArray[i],
-      ];
-    }
-    return shuffledArray;
-  };
-
-  const checkUserOrder = () => {
-    console.log(
-      "I will do something later, I should check this...",
-      shuffledCupData
-    );
-  };
-
-  useEffect(() => {
-    setShuffledCupData(shuffleArray(cupData));
-  }, []);
-
-  useEffect(() => {
-    console.log("Apparently this is changing", cupsOrder);
-    const matchingColors = shuffledCupData.filter(
-      (cup, i) => cup.color === cupsOrder[i].color
-    ).length;
-    setMatchingCups(matchingColors);
-  }, [cupsOrder, shuffledCupData]);
+  const [open, setOpen] = useState(true);
+  const [selected, setSelected] = useState(cupNumbers[0]);
 
   return (
     <div className="flex flex-col items-center justify-center h-screen">
-      <Reorder.Group
-        values={cupsOrder}
-        axis="x"
-        onReorder={setCupsOrder}
-        className="p-4 mb-4"
-      >
-        {cupsOrder.map((cup) => (
-          <Reorder.Item value={cup} key={cup.color} className="inline-block">
-            <div className="flex items-center justify-center rounded-lg w-24 h-24 p-2.5 cursor-grab rotate-180">
-              <img
-                src={cup.image}
-                className="pointer-events-none"
-                alt={`cup-${cup.color}-image`}
-              />
-            </div>
-          </Reorder.Item>
-        ))}
-      </Reorder.Group>
+      {/* <CupGame /> */}
+      <Dialog open={open} onClose={() => {}} className="relative z-10">
+        <DialogBackdrop
+          transition
+          className="fixed inset-0 bg-slate-800 bg-opacity-75 transition-opacity data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in"
+        />
 
-      <p
-        className={`font-extrabold text-2xl mb-4 ${
-          matchingCups === cupData.length ? "text-green-500" : "text-red-500"
-        }`}
-      >
-        {" "}
-        {matchingCups}
-      </p>
+        <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+          <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+            <DialogPanel
+              transition
+              className="relative transform overflow-hidden rounded-lg bg-red-400 text-left shadow-xl transition-all data-[closed]:translate-y-4 data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in sm:my-8 sm:w-full sm:max-w-lg data-[closed]:sm:translate-y-0 data-[closed]:sm:scale-95"
+            >
+              <div className="bg-white px-4 pb-4 pt-5">
+                <div className="flex justify-center">
+                  <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                    <DialogTitle
+                      as="h3"
+                      className="text-base text-center font-semibold leading-6 text-gray-900"
+                    >
+                      Select a difficulty
+                    </DialogTitle>
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500">
+                        Select how many different colors you want to play with
+                      </p>
 
-      <button
-        onClick={checkUserOrder}
-        className="bg-transparent py-2 px-4 border-2 rounded border-slate-300 text-slate-300 hover:border-slate-100 hover:text-slate-100 font-extrabold"
-      >
-        Submit
-      </button>
+                      <RadioGroup
+                        value={selected}
+                        onChange={setSelected}
+                        aria-label="Server size"
+                      >
+                        {cupNumbers.map((aNumber) => (
+                          <Field
+                            key={aNumber}
+                            className="flex items-center gap-2"
+                          >
+                            <Radio
+                              value={aNumber}
+                              className="group flex size-5 items-center justify-center border-cyan-300 rounded-full border bg-white data-[checked]:bg-blue-400"
+                            >
+                              <span className="invisible size-2 rounded-full bg-white group-data-[checked]:visible" />
+                            </Radio>
+                            <Label className="flex">
+                              {cupData.slice(0, aNumber).map((aCup) => (
+                                <div className="flex items-center justify-center rounded-lg w-12 h-12 p-2 cursor-grab rotate-180">
+                                  <img
+                                    src={aCup.image}
+                                    className="pointer-events-none"
+                                    alt={`cup-${aCup.color}-image`}
+                                  />
+                                </div>
+                              ))}
+                            </Label>
+                          </Field>
+                        ))}
+                      </RadioGroup>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gray-700 px-4 py-3 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="inline-flex w-full justify-center rounded-md bg-rose-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto"
+                >
+                  Play
+                </button>
+              </div>
+            </DialogPanel>
+          </div>
+        </div>
+      </Dialog>
     </div>
   );
 }
